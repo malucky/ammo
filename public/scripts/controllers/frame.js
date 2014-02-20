@@ -107,6 +107,11 @@ angular.module('ammoApp')
             .success(function(userObj) {
               UserService.setUser(userObj);
               UserService.setLogged(true);
+
+              $http.get(userObj.username + "/playlists")
+                .success(function(playlists) {
+                  UserService.user.playlists = playlists;
+              });
             })
             .error(function(err){
               console.log(err);
@@ -115,7 +120,7 @@ angular.module('ammoApp')
       }
     };
 
-        /*
+    /*
       ========== shareRequestModal ==========
       -Called when shareRequestModal is filled out and "Share" is clicked. When modal is submitted, trigger QueueService.saveQueue with those inputs.
 
@@ -131,11 +136,34 @@ angular.module('ammoApp')
       });
     };
 
+    /* ========== $scope.stopLoadingBar ==========
+      In charge of stoping the top Loading Bar when all the players are loaded
+
+      Params:
+        asset: string with the name of the service player which is now ready
+    */
     $scope.stopLoadingBar = function (asset) {
       // console.log("Loaded: ", asset);
       $scope.assetsLoaded++;
       if($scope.assetsLoaded === 2) {
         ngProgress.complete();
       }
+    };
+
+    /* ========== $scope.changePlaylist ==========
+      Redirects user to /playlist/:id who then will display the tracks of that playlist
+
+      Params:
+        playlist: playlist object getting passed when a user clicks to a playlist name on the sidebar
+    */
+    $scope.changePlaylist = function(playlist) {
+      $location.path('/playlist/' + playlist.shareId);
+    };
+
+    /* ========== $scope.showQueue ==========
+      Redirects the user to /listen to load the queue
+    */
+    $scope.showQueue = function() {
+      $location.path('/listen');
     };
   });

@@ -2,16 +2,16 @@ angular.module('ammoApp')
 
   .controller('QueueController', function($scope, $http, $routeParams, $route, $location, QueueService, UserService, ScraperService) {
     $scope.artistImage = "";
-
+    $scope.QueueService = QueueService;
     /*
       This code checks if there was an ID included in the route. and
       handles the cases accordingly.
     */
 
     //If there was a id included as part of the route
-    if( $routeParams.id ){
+    if( $routeParams.id && $routeParams.id.length === 16){
       //Check if the id provided matches whats already loaded in the queue
-      if( $routeParams.id === QueueService.queue.shareId ){
+      if( $routeParams.id === QueueService.queue.listenId ){
         //We do not need to fetch the info from the server, as we already have it.
         $scope.songs = QueueService.queue.songs;
       } else {
@@ -21,6 +21,10 @@ angular.module('ammoApp')
           $scope.songs = queue.songs;
         });
       }
+    //if there was in invalid ID
+    } else if ($routeParams.id) {
+      console.log($routeParams.id);
+      $location.path('/listen/');
     //else, the path did not include an ID
     } else {
       //if the current queue is live
@@ -72,7 +76,6 @@ angular.module('ammoApp')
       }
     };
 
-
     /* 
       ======== saveToPlaylist ========
       Save the current queue to a playlist.
@@ -84,20 +87,27 @@ angular.module('ammoApp')
         return;
       }
 
-      $http({ method: 'POST', url: '/' + UserService.user.username + '/playlists', data: {
-        name: "Placeholder name",
+      if(!$scope.playlistName) {
+        console.log("Playlist name can not be empty");
+        return;
+      }
+
+      var playlistObj = {
+        name: $scope.playlistName,
         songs: $scope.songs
-        }
-      })
+      };
+
+      $http({ method: 'POST', url: '/' + UserService.user.username + '/playlists', data: playlistObj })
       .success(function() {
         console.log("Saved successfully");
+        UserService.user.playlists.push(playlistObj);
       })
       .error(function() {
         console.log("Error saving playlist");
       });
-    };
 
-    
+      $scope.playlistName = "";
+    };
     
     /*
       ========== passToPlay ==========
