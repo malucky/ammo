@@ -10,6 +10,7 @@ angular.module('ammoApp')
 
     $scope.UserService = UserService;
     $scope.location = $location;
+    //check if is home page or url contains the keyword playlist or listen, else it is a share view
     $scope.isShareView = $scope.location.path() !== '/' && $scope.location.path().indexOf('playlist') === -1 && $scope.location.path().indexOf('listen') === -1;
     $scope.isMobile = window.innerWidth <= 800 && window.innerHeight <= 600;
     //initializing socket
